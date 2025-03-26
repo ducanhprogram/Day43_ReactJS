@@ -1,41 +1,45 @@
-import InputText from "@/components/InputText/InputText";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useState } from "react";
+import InputText from "@/components/InputText/InputText";
 
 const Register = () => {
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
         password: "",
-        confirmPassword: "",
+        passwordConfirmation: "",
     });
+
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
-    const splitFullName = (name) => {
-        const parts = name.trim().split(" ");
-        return {
-            firstName: parts.pop(),
-            lastName: parts.join(" "),
-        };
+    //Tác họ và tên
+    const splitFullName = (fullName) => {
+        const nameParts = fullName.trim().split(" ");
+        const firstName = nameParts.pop();
+        const lastName = nameParts.join(" ");
+        return { firstName, lastName };
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        setErrors({ ...errors, [e.target.name]: "" });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        setErrors({ ...errors, [name]: "" });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors({});
 
-        const { fullName, email, password, confirmPassword } = formData;
+        const { fullName, email, password, passwordConfirmation } = formData;
 
-        if (password !== confirmPassword) {
-            setErrors({ confirmPassword: "Mật khẩu không khớp" });
+        if (password !== passwordConfirmation) {
+            setErrors({
+                passwordConfirmation: "Mật khẩu nhập lại không khớp.",
+            });
             return;
         }
-
         const { firstName, lastName } = splitFullName(fullName);
 
         const payload = {
@@ -43,7 +47,7 @@ const Register = () => {
             lastName,
             email,
             password,
-            password_confirmation: confirmPassword,
+            password_confirmation: passwordConfirmation,
         };
 
         try {
@@ -59,27 +63,34 @@ const Register = () => {
             );
 
             const data = await response.json();
-            console.log(data);
+            console.log(response, data);
+
             if (!response.ok) {
                 if (data.errors) {
                     setErrors(data.errors);
-                }
-
-                if (data.message && data.message.includes("email")) {
+                } else if (
+                    data.error &&
+                    data.error.includes("Duplicate entry")
+                ) {
+                    setErrors({ fullName: "Tên đã được sử dụng" });
+                } else if (data.message && data.message.includes("email")) {
                     setErrors({
                         email: "Email này đã được sử dụng. Vui lòng sử dụng email khác",
+                    });
+                } else if (data.message.includes("8 characters")) {
+                    setErrors({
+                        password: "Mật khẩu phải có ít nhất 8 ký tự!!!",
                     });
                 }
                 return;
             }
-
             localStorage.setItem("token", data.access_token);
+            alert("Đăng ký thành công");
             navigate("/");
         } catch (error) {
             console.error("Lỗi kết nối API:", error);
         }
     };
-
     return (
         <div
             style={{ maxWidth: "400px", margin: "50px auto", padding: "20px" }}
@@ -88,7 +99,8 @@ const Register = () => {
             <form onSubmit={handleSubmit}>
                 <div>
                     <InputText
-                        label="Họ và tên"
+                        label={"Họ và tên"}
+                        type="text"
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
@@ -97,7 +109,7 @@ const Register = () => {
                 </div>
                 <div>
                     <InputText
-                        label="Email"
+                        label={"Email"}
                         type="email"
                         name="email"
                         value={formData.email}
@@ -107,7 +119,7 @@ const Register = () => {
                 </div>
                 <div>
                     <InputText
-                        label="Mật khẩu"
+                        label={"Mật khẩu"}
                         type="password"
                         name="password"
                         value={formData.password}
@@ -118,14 +130,15 @@ const Register = () => {
 
                 <div>
                     <InputText
-                        label="Nhập lại mật khẩu"
+                        label={"Nhập lại mật khẩu"}
                         type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
+                        name="passwordConfirmation"
+                        value={formData.passwordConfirmation}
                         onChange={handleChange}
-                        error={errors.confirmPassword}
+                        error={errors.passwordConfirmation}
                     />
                 </div>
+
                 <button type="submit">Đăng ký</button>
             </form>
         </div>

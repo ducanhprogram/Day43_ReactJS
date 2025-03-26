@@ -9,6 +9,7 @@ const ProtectedRoute = ({ children }) => {
     const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
         setLoading(true);
         const fetchAPI = async () => {
             try {
@@ -16,9 +17,7 @@ const ProtectedRoute = ({ children }) => {
                     `https://api01.f8team.dev/api/auth/me`,
                     {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem(
-                                "token"
-                            )}`,
+                            Authorization: `Bearer ${token}`,
                         },
                     }
                 );
@@ -27,8 +26,8 @@ const ProtectedRoute = ({ children }) => {
                 }
 
                 const data = await response.json();
+                console.log(data);
                 setCurrentUser(data.user);
-                return data;
             } catch (e) {
                 console.error(e.message);
             } finally {
@@ -38,12 +37,13 @@ const ProtectedRoute = ({ children }) => {
         fetchAPI();
     }, []);
 
-    if (!isLoading) {
+    if (isLoading) {
         return <p>Loading...</p>;
     }
 
     if (!currentUser) {
         const path = encodeURIComponent(location.pathname);
+        console.log(path);
         return (
             <Navigate
                 to={`${config.routes.login}${path ? `?continue=${path}` : ""}`}

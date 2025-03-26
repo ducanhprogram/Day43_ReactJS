@@ -4,9 +4,10 @@ import Products from "../Products";
 import AdminLayout from "@/layouts/AdminLayout";
 import ProductDetail from "../ProductDetail";
 import Users from "../Users";
+
 import Register from "../Register";
-import Login from "../Login/Login";
-import NoFooterLayout from "@/layouts/NoFooterLayout";
+import Login from "../Login";
+import NotFound from "../NotFound.jsx";
 
 const routes = [
     {
@@ -22,23 +23,25 @@ const routes = [
         path: config.routes.productDetail,
         component: ProductDetail,
         layout: null,
-    },
-    {
-        path: config.routes.register,
-        component: Register,
-        layout: NoFooterLayout,
+        protected: true,
     },
 
     {
+        path: config.routes.register,
+        component: Register,
+    },
+    {
         path: config.routes.login,
         component: Login,
-        layout: NoFooterLayout,
-        protected: false,
     },
     {
         path: config.routes.users,
         component: Users,
         protected: true,
+    },
+    {
+        path: config.routes.notFound,
+        component: NotFound,
     },
 ];
 
