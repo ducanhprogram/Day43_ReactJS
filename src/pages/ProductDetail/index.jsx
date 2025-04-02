@@ -3,7 +3,6 @@ import useFetch from "../../hooks/useFetch";
 
 const ProductDetail = () => {
     const params = useParams();
-    console.log(params);
 
     const [product, isLoading] = useFetch(
         `https://api01.f8team.dev/api/products/${params.slug}`

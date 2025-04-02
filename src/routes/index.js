@@ -5,9 +5,9 @@ import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound.jsx";
 import ProductDetail from "@/pages/ProductDetail";
 import Products from "@/pages/Products";
+import Register from "@/pages/Register2";
+import Register2 from "@/pages/Register2";
 import Users from "@/pages/Users";
-import Register from "../Register";
-import Login2 from "../Login2";
 
 const routes = [
     {
@@ -35,13 +35,13 @@ const routes = [
         component: Login,
     },
     {
-        path: config.routes.login2,
-        component: Login2,
-    },
-    {
         path: config.routes.users,
         component: Users,
         protected: true,
+    },
+    {
+        path: config.routes.register2,
+        component: Register2,
     },
     {
         path: config.routes.notFound,

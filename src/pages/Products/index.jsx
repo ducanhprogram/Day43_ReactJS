@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
-import useFetch from "../../hooks/useFetch";
+
 import config from "@/config";
+
+import { useEffect, useState } from "react";
+import * as productService from "@/services/productService";
 
 /*
 Route: /products/:id
@@ -9,21 +12,27 @@ Link to: /products/${product.id}
 */
 
 const Products = () => {
-    const [result, isLoading] = useFetch(
-        `https://api01.f8team.dev/api/products`
-    );
+    // const [result, isLoading] = useFetch(
+    //     `https://api01.f8team.dev/api/products`
+    // );
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        async function handle() {
+            const res = await productService.getAll();
+            setProducts(res.data);
+        }
+        handle();
+    }, []);
 
     // console.log({ products, isLoading });
     return (
         <div>
             <h1>Products Page</h1>
-            {isLoading && <div>Loading...</div>}
+            {/* {isLoading && <div>Loading...</div>} */}
             <ul>
-                {result.data.map((product) => {
+                {products.map((product) => {
                     return (
                         <li key={product.id}>
                             <Link

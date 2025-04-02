@@ -1,6 +1,7 @@
 import InputText from "@/components/InputText/InputText";
 import config from "@/config";
 import useQuery from "@/hooks/useQuery";
+import httpRequest from "@/utils/httpRequest";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -43,7 +44,7 @@ const Login = () => {
                 return;
             }
 
-            localStorage.setItem("token", data.access_token);
+            httpRequest.setToken(data.access_token);
             const continuePath = query.get("continue") || config.routes.home;
             navigate(continuePath);
             console.log(response, data);

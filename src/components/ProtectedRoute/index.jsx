@@ -1,4 +1,5 @@
 import config from "@/config";
+import authService from "@/services/authService";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
@@ -9,32 +10,24 @@ const ProtectedRoute = ({ children }) => {
     const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        // const token = localStorage.getItem("token");
         setLoading(true);
-        const fetchAPI = async () => {
-            try {
-                const response = await fetch(
-                    `https://api01.f8team.dev/api/auth/me`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    throw response;
-                }
 
-                const data = await response.json();
-                console.log(data);
+        (async () => {
+            try {
+                const data = await authService.getCurrentUser();
                 setCurrentUser(data.user);
-            } catch (e) {
-                console.error(e.message);
+            } catch (error) {
+                console.error("Error fetching current user: ", error);
+                if (error.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    Navigate("/login");
+                }
+                setCurrentUser(null);
             } finally {
                 setLoading(false);
             }
-        };
-        fetchAPI();
+        })();
     }, []);
 
     if (isLoading) {

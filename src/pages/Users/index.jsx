@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 
 import config from "@/config";
 import { useEffect, useState } from "react";
+import userService from "@/services/userService";
 
 /*
-Route: /users/:id
 
+Route: /users/:id
 Link to: /users/${product.id}
+
 */
 
 const Users = () => {
@@ -15,12 +17,8 @@ const Users = () => {
     useEffect(() => {
         const fetchAPI = async () => {
             try {
-                const response = await fetch(
-                    `https://api01.f8team.dev/api/users`
-                );
-
-                const res = await response.json();
-                setUsers(res.data);
+                const users = await userService.getAll();
+                setUsers(users);
             } catch (e) {
                 console.error(e.message);
             }
@@ -30,13 +28,15 @@ const Users = () => {
 
     return (
         <div>
-            <h1>Users Page</h1>s
+            <h1>Users Page</h1>
             <ul>
                 {users.map((user) => {
                     return (
                         <li key={user.id}>
-                            <Link to={`${config.routes.users}/${user.slug}`}>
-                                {user.firstName + " " + user.lastName}
+                            <Link
+                                to={`${config.routes.users}/${user.username}`}
+                            >
+                                {user.firstName}
                             </Link>
                         </li>
                     );

@@ -2,9 +2,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 import InputText from "@/components/InputText/InputText";
-import httpRequest from "@/utils/httpRequest";
 
-const Register = () => {
+const Register2 = () => {
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
@@ -52,57 +51,44 @@ const Register = () => {
         };
 
         try {
-            const response = await httpRequest.post("/auth/register", payload, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const response = await fetch(
+                `https://api01.f8team.dev/api/auth/register`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
 
-            localStorage.setItem("token", response.access_token);
+            const data = await response.json();
+            console.log(response, data);
+
+            if (!response.ok) {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else if (
+                    data.error &&
+                    data.error.includes("Duplicate entry")
+                ) {
+                    setErrors({ fullName: "Tên đã được sử dụng" });
+                } else if (data.message && data.message.includes("email")) {
+                    setErrors({
+                        email: "Email này đã được sử dụng. Vui lòng sử dụng email khác",
+                    });
+                } else if (data.message.includes("8 characters")) {
+                    setErrors({
+                        password: "Mật khẩu phải có ít nhất 8 ký tự!!!",
+                    });
+                }
+                return;
+            }
+            localStorage.setItem("token", data.access_token);
             alert("Đăng ký thành công");
             navigate("/");
         } catch (error) {
-            console.log(error);
-            if (error.response) {
-                const data = error.response.data;
-                console.log("Dữ liệu lỗi từ API:", data);
-
-                if (data.message) {
-                    // Xử lý lỗi từ message object
-                    const errorMessages = {};
-
-                    // Nếu có lỗi email
-                    if (data.message.email && data.message.email.length > 0) {
-                        errorMessages.email =
-                            "Email này đã được sử dụng. Vui lòng sử dụng email khác";
-                    }
-
-                    if (
-                        data.message.password &&
-                        data.message.password.length > 0
-                    ) {
-                        errorMessages.password =
-                            "Mật khẩu phải có ít nhất 8 ký tự!!!";
-                    }
-
-                    if (
-                        data.message.firstName &&
-                        data.message.firstName.length > 0
-                    ) {
-                        errorMessages.fullName = data.message.firstName[0];
-                    }
-                    if (
-                        data.message.lastName &&
-                        data.message.lastName.length > 0
-                    ) {
-                        errorMessages.fullName = data.message.lastName[0];
-                    }
-
-                    setErrors(errorMessages);
-                }
-            } else {
-                console.error("Lỗi kết nối API:", error.message);
-            }
+            console.error("Lỗi kết nối API:", error);
         }
     };
     return (
@@ -159,4 +145,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default Register2;
